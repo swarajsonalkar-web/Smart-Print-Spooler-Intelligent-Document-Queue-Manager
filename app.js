@@ -1,0 +1,5 @@
+const $=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+async function api(u,o={}){let r=await fetch(u,{headers:{'Content-Type':'application/json'},...o});return r.json()}
+async function load(){let j=await api('/api/jobs');$('#jobs').innerHTML=j.map(x=>`<div class="item"><b>${esc(x.filename)}</b> · Priority ${x.priority} · ${x.status}<div class="row"><button class="secondary" onclick="action(${x.id},'print')">Simulate print</button><button class="secondary" onclick="action(${x.id},'pause')">Pause</button><button class="secondary" onclick="action(${x.id},'resume')">Resume</button><button class="danger" onclick="action(${x.id},'cancel')">Cancel</button></div></div>`).join('')||'Queue is empty'}
+window.action=async(i,a)=>{await api(`/api/jobs/${i}/${a}`,{method:'POST'});load()};
+$('#f').onsubmit=async e=>{e.preventDefault();await api('/api/jobs',{method:'POST',body:JSON.stringify({filename:$('#filename').value,priority:$('#priority').value})});e.target.reset();load()};load();
